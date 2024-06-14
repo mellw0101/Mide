@@ -1,0 +1,134 @@
+#!/bin/bash
+
+BASE_DIR=$($pwd)
+
+rm_element_from_args() {
+    ARGS=${ARGS/$1/}
+}
+
+printc() {
+    echo -ne "Amake - [ "
+    color_tty $2
+    echo -ne "$1"
+    color_tty Reset
+    echo -ne " ]\n"
+}
+
+readc() {
+    echo -n "AMake - [ "
+    color_tty $2
+    echo -n "$1"
+    color_tty Reset
+    echo -n " ] -> "
+    read $3
+}
+
+print_if_folder_not_empty() {
+    folder=$1
+    if [ -z "$(ls -A $folder)" ]; then
+        return
+    else
+        printc $2 $3
+    fi
+}
+
+prompt() {
+    while true; do
+        readc "Perform $1 -> Y/n " Yellow a
+        case $a in
+            [yY])
+                $1
+                break ;;
+            [nN])
+                break ;;
+            *)
+                printc "Invalid Choice, Only Allowed Answers -> ( Y/n )" Red ;;
+        esac
+    done
+}
+
+color_tty() {
+    for color in "$@"; do
+        case $color in
+        Green)
+            echo -ne "\033[32m" ;;
+        Red)
+            echo -ne "\033[31m" ;;
+        Yellow)
+            echo -ne "\033[33m" ;;
+        Blue)
+            echo -ne "\033[34m" ;;
+        Bright_Blue)
+            echo -ne "\033[94m" ;;
+        Gray)
+            echo -ne "\033[90m" ;;
+        Reset)
+            echo -ne "\033[0m" ;;
+        *)
+            echo -ne "\033[0m" ;;
+        esac
+    done
+}
+
+promp_func() {
+    if [[ $PROMPT_FLAG == true ]]; then
+        prompt $@
+    else
+        $@
+    fi
+    case $@ in
+    Configure)
+        rm_element_from_args "--configure" ;;
+    Build)
+        rm_element_from_args "--build" ;;
+    Install)
+        rm_element_from_args "--install" ;;
+    Clean)
+        rm_element_from_args "--clean" ;;
+    *)
+        ;;
+    esac
+}
+
+Configure() {
+    printc 'Configuring...' Green
+}
+
+Build() {
+    printc 'Building...' Green
+}
+
+Install() {
+    printc 'Installing...' Green
+}
+
+Clean() {
+    printc 'Cleaning...' Green
+}
+
+main() {
+    # for arg in $ARGS; do
+    #     case $arg in
+    #     --configure)
+    #         promp_func Configure ;;
+    #     --build)
+    #         promp_func Build ;;
+    #     --install)
+    #         promp_func Install ;;
+    #     --clean)
+    #         promp_func Clean ;;
+    #     --help)
+    #         Help ;;
+    #     *)
+    #         printc ''"$arg"' -> Unknown Command -> Run "AMake --help" For Help' Red ;;
+    #     esac
+    # done
+
+    clang++ -std=c++17 -o bin/main src/main.cpp
+}
+
+# Main Script Starts Here
+############################################################################################################################################################################
+# Commends:                             Comments:
+ARGS=$@                                 # Save The Args Into A Variable ( This Needs to Be Done Globaly ) 
+main                                    # Run Main Function With The Args
